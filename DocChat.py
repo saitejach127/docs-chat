@@ -4,17 +4,9 @@ import pandas as pd  # for storing text and embeddings data
 import tiktoken  # for counting tokens
 from scipy import spatial  # for calculating vector similarities for search
 import os
+import time
 
 class DocChat:
-
-    EMBEDDING_MODEL = ""
-    GPT_MODEL = ""
-    EMBEDDING_PATH = ""
-    INTRODUCTION_QUESTION = ''
-    SYSTEM_CONTEXT_MESSAGE = ""
-    DOCUMENT_NAME = ""
-    df = pd.DataFrame()
-    openaikey = ""
 
     def __init__(
         self,
@@ -115,5 +107,16 @@ class DocChat:
         response_message = response["choices"][0]["message"]["content"]
         return response_message
 
-docChat = DocChat("embeddings/budget_embeddings.csv", 'Use the below Budget 2023-24 speech document to answer the subsequent question. If the answer cannot be found in the article, write "I could not find an answer."', "You answer questions about Budget Speech 2023-24., ",'Budget Doc :', APIKEY=os.environ["OPENAI_API_KEY"])
-print(docChat.ask("Who is the finance minister of india?"))
+
+EMBEDDING_PATH = "embeddings/csm_nltk.csv"
+INTRODUCTION_QUESTION = 'Use the below ServiceNow Customer Service Management Documentation to answer the subsequent question. If the answer cannot be found in the article, write "I could not find an answer."'
+SYSTEM_CONTEXT_MESSAGE = 'You answer questions about ServiceNow Customer Service Management Documentation.'
+DOCUMENT_NAME = 'ServiceNow Documentation'
+docChat = DocChat(EMBEDDING_PATH, INTRODUCTION_QUESTION, SYSTEM_CONTEXT_MESSAGE,DOCUMENT_NAME, APIKEY="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")
+
+start_time = time.time()
+print(docChat.ask("What is CSM?"))
+print(docChat.ask("What is the difference between CSM and ITSM?"))
+end_time = time.time()
+
+print(f"Time taken: {end_time - start_time} seconds")
