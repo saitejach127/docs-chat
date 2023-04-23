@@ -1,1 +1,178 @@
-<h1>HEllow world</h1>
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>ServiceNow Customer Service Management Question-Answer Chatbot</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        .chat-container {
+            width: 600px;
+            margin: 50px auto;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            background-color: #f2f2f2;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .chat-log {
+            height: 400px;
+            overflow-y: scroll;
+        }
+
+        .chat-message {
+            padding: 10px;
+            margin: 10px;
+            border-radius: 5px;
+        }
+
+        .bot-message {
+            background-color: #f2f2f2;
+            text-align: left;
+        }
+
+        .user-message {
+            background-color: #4CAF50;
+            color: white;
+            text-align: right;
+        }
+
+        .chat-input {
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-input input[type="text"] {
+            flex: 1;
+            margin-right: 10px;
+            padding: 5px;
+            border-radius: 5px;
+            border: none;
+        }
+
+        .chat-input button {
+            padding: 5px 10px;
+            border-radius: 5px;
+            border: none;
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+        }
+
+        .chat-input button:hover {
+            background-color: #3e8e41;
+        }
+
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <h2>ServiceNow Customer Service Management Question-Answer Chatbot</h2>
+        </div>
+        <div class="chat-log">
+            <!-- <div class="chat-message bot-message">
+                <p>Hello! How can I help you today?</p>
+            </div> -->
+        </div>
+        <div class="chat-input">
+            <input type="text" placeholder="Type your message here...">
+            <button>Send</button>
+        </div>
+    </div>
+    <script>
+        const chatLog = document.querySelector(".chat-log");
+        const chatInput = document.querySelector(".chat-input input[type='text']");
+        const sendButton = document.querySelector(".chat-input button");
+
+        function addBotMessage(message, usermessage) {
+            const chatMessage = document.createElement("div");
+            chatMessage.classList.add("chat-message", "bot-message");
+            var link = '<a href="https://docs.servicenow.com/search?q=' + encodeURIComponent(usermessage) + '" target="_blank" rel="noopener noreferrer">Refer to this link for more info in ServiceNow Documentation</a>';
+            chatMessage.innerHTML = `<p>${message}<br> ${link}</p>`;
+            chatLog.appendChild(chatMessage);
+            chatLog.scrollTop = chatLog.scrollHeight;
+        }
+
+        function addUserMessage(message) {
+            const chatMessage = document.createElement("div");
+            chatMessage.classList.add("chat-message", "user-message");
+            chatMessage.innerHTML = `<p>${message}</p>`;
+            chatLog.appendChild(chatMessage);
+            chatLog.scrollTop = chatLog.scrollHeight;
+        }
+
+        async function fetchingAnswer(message) {
+            const question = { "question": message };
+
+            try {
+                const response = await fetch("http://127.0.0.1:5000/api", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(question)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                // Process response data
+                addBotMessage(data.message, message);
+            } catch (error) {
+                console.error("Error:", error);
+            }
+        }
+
+        sendButton.addEventListener("click", () => {
+            const message = chatInput.value.trim();
+            if (message !== "") {
+                fetchingAnswer(message);
+                addUserMessage(message);
+                // Send message to backend for processing
+                // Receive response from backend and call addBotMessage function
+                chatInput.value = "";
+            }
+        });
+
+        // chatInput.addEventListener("keyup", (event) => {
+        //     if (event.keyCode === 13) {
+        //         const message = chatInput.value.trim();
+        //         if (message !== "") {
+        //             addUserMessage(message);
+        //             // Send message to backend for processing
+        //             // Receive response from backend and call addBotMessage function
+        //             chatInput.value = "";
+        //         }
+        //     }
+        // });
+
+        // Example of how to call the addBotMessage function
+        // addBotMessage("Hello! How can I help you today?");
+
+    </script>
+</body>
+
+</html>
