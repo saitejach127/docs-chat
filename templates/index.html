@@ -51,6 +51,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            background-color: #f2f2f2;
+            border-top: 1px solid #ccc;
         }
 
         .chat-input input[type="text"] {
@@ -70,6 +72,11 @@
             cursor: pointer;
         }
 
+        .chat-input button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
         .chat-input button:hover {
             background-color: #3e8e41;
         }
@@ -81,6 +88,47 @@
 
         a:hover {
             text-decoration: underline;
+        }
+
+        .typing-message {
+            margin: 10px;
+            text-align: center;
+        }
+
+        .typing-message p {
+            margin: 0;
+        }
+
+        .dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            margin: 0 3px;
+            border-radius: 50%;
+            background-color: #ccc;
+            animation: typing 1s infinite;
+        }
+
+        .dot:nth-child(2) {
+            animation-delay: 0.1s;
+        }
+
+        .dot:nth-child(3) {
+            animation-delay: 0.2s;
+        }
+
+        @keyframes typing {
+            0% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-3px);
+            }
+
+            100% {
+                transform: translateY(0);
+            }
         }
     </style>
 </head>
@@ -95,23 +143,40 @@
                 <p>Hello! How can I help you today?</p>
             </div> -->
         </div>
+        <div class="typing-message" style="display:none;">
+            <p><span class="dot"></span><span class="dot"></span><span class="dot"></span></p>
+        </div>
         <div class="chat-input">
-            <input type="text" placeholder="Type your message here...">
-            <button>Send</button>
+            <input type="text" placeholder="Type your question here...">
+            <button>Ask</button>
+            <!-- <button id="regenerate-button" onclick="regenerateMessage()" disabled>Regenerate</button> -->
         </div>
     </div>
     <script>
         const chatLog = document.querySelector(".chat-log");
         const chatInput = document.querySelector(".chat-input input[type='text']");
         const sendButton = document.querySelector(".chat-input button");
+        // const regenerateButton = document.querySelector("#regenerate-button");
+        const typingMessage = document.querySelector(".typing-message");
+        let disabled = false;
 
-        function addBotMessage(message, usermessage) {
+        async function addBotMessage(message, usermessage) {
+
             const chatMessage = document.createElement("div");
             chatMessage.classList.add("chat-message", "bot-message");
-            var link = '<a href="https://docs.servicenow.com/search?q=' + encodeURIComponent(usermessage) + '" target="_blank" rel="noopener noreferrer">Refer to this link for more info in ServiceNow Documentation</a>';
-            chatMessage.innerHTML = `<p>${message}<br> ${link}</p>`;
+            var link = '<a href="https://docs.servicenow.com/search?q=' + encodeURIComponent(usermessage) + '" target="_blank" rel="noopener noreferrer">Refer to this link for more info in ServiceNow Documentation Site</a>';
             chatLog.appendChild(chatMessage);
+            for (let i = 0; i < message.length; i++) {
+                await new Promise(resolve => setTimeout(resolve, 50)); // Simulate typing speed
+                chatMessage.innerHTML += message.charAt(i);
+                chatLog.scrollTop = chatLog.scrollHeight;
+            }
+            chatMessage.innerHTML += `<br> ${link}`;
             chatLog.scrollTop = chatLog.scrollHeight;
+
+            typingMessage.style.display = "none"; // Hide typing message
+            sendButton.disabled = false;
+            disabled = false;
         }
 
         function addUserMessage(message) {
@@ -139,38 +204,56 @@
                 }
 
                 const data = await response.json();
-                // Process response data
+                // regenerateButton.disabled = false;
+
+
                 addBotMessage(data.message, message);
+
             } catch (error) {
                 console.error("Error:", error);
             }
         }
 
-        sendButton.addEventListener("click", () => {
-            const message = chatInput.value.trim();
-            if (message !== "") {
-                fetchingAnswer(message);
-                addUserMessage(message);
-                // Send message to backend for processing
-                // Receive response from backend and call addBotMessage function
-                chatInput.value = "";
-            }
-        });
+        async function sendMessage() {
+            if (!disabled) {
+                const message = chatInput.value.trim();
+                if (message !== "") {
+                    chatInput.value = "";
+                    sendButton.disabled = true;
+                    disabled = true;
+                    
+                    // const t0 = performance.now();
+                    fetchingAnswer(message);
+                    addUserMessage(message);
+                    typingMessage.style.display = "block"; // Show typing message
+                    // const t1 = performance.now();
+                    // console.log(`Time taken: ${t1 - t0} milliseconds`);
 
-        // chatInput.addEventListener("keyup", (event) => {
-        //     if (event.keyCode === 13) {
-        //         const message = chatInput.value.trim();
-        //         if (message !== "") {
-        //             addUserMessage(message);
-        //             // Send message to backend for processing
-        //             // Receive response from backend and call addBotMessage function
-        //             chatInput.value = "";
-        //         }
-        //     }
+                    // await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate bot response delay
+                }
+            }
+        }
+
+        // function regenerateMessage() {
+        //     chatLog.removeChild(chatLog.lastChild); // Remove previous bot message
+        //     regenerateButton.disabled = true;
+        //     // Call sendMessage function again to regenerate bot message
+        //     sendMessage();
+        // }
+
+        // regenerateButton.addEventListener("click", () => {
+        //         regenerateMessage();
         // });
 
-        // Example of how to call the addBotMessage function
-        // addBotMessage("Hello! How can I help you today?");
+        sendButton.addEventListener("click", () => {
+            sendMessage();
+        });
+
+        chatInput.addEventListener("keyup", (event) => {
+            if (event.keyCode === 13) {
+                sendMessage();
+            }
+        });
 
     </script>
 </body>
