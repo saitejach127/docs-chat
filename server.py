@@ -22,3 +22,6 @@ def get_answer():
         "success": True,
         "message": docChat.ask(query=question)
     }
+
+if __name__ == "__main__":
+    app.run(host='0.0.0.0')
