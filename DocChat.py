@@ -106,17 +106,3 @@ class DocChat:
         )
         response_message = response["choices"][0]["message"]["content"]
         return response_message
-
-
-EMBEDDING_PATH = "embeddings/csm_nltk.csv"
-INTRODUCTION_QUESTION = 'Use the below ServiceNow Customer Service Management Documentation to answer the subsequent question. If the answer cannot be found in the article, write "I could not find an answer."'
-SYSTEM_CONTEXT_MESSAGE = 'You answer questions about ServiceNow Customer Service Management Documentation.'
-DOCUMENT_NAME = 'ServiceNow Documentation'
-docChat = DocChat(EMBEDDING_PATH, INTRODUCTION_QUESTION, SYSTEM_CONTEXT_MESSAGE,DOCUMENT_NAME, APIKEY="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")
-
-start_time = time.time()
-print(docChat.ask("What is CSM?"))
-print(docChat.ask("What is the difference between CSM and ITSM?"))
-end_time = time.time()
-
-print(f"Time taken: {end_time - start_time} seconds")
