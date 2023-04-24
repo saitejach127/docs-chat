@@ -94,7 +94,7 @@ class DocChat:
         message = self.query_message(query, df, model=model, token_budget=token_budget)
         system_message = f"{self.SYSTEM_CONTEXT_MESSAGE}"
         for previous_qa in previous_qas:
-            system_message += f"\nYFor this question {previous_qa.question} this is the answer provided {previous_qa.answer}"
+            system_message += f"\nYFor this question {previous_qa.get('question')} this is the answer provided {previous_qa.get('answer')}"
         if print_message:
             print(message)
         messages = [
