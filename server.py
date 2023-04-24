@@ -18,9 +18,10 @@ def show_ui():
 @app.route("/api", methods=["POST"])
 def get_answer():
     question = request.json.get("question")
+    previous_qas = request.json.get("previous_qas")
     return {
         "success": True,
-        "message": docChat.ask(query=question)
+        "message": docChat.ask(query=question, previous_qas=previous_qas, print_message=True)
     }
 
 if __name__ == "__main__":

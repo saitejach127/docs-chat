@@ -159,6 +159,15 @@
         // const regenerateButton = document.querySelector("#regenerate-button");
         const typingMessage = document.querySelector(".typing-message");
         let disabled = false;
+        let previous_qas = [];
+        let MAX_QA_LENGTH = 2;
+
+        function addQuestionAndAnswerToPrevious(qa){
+            if(previous_qas.length >= MAX_QA_LENGTH){
+                previous_qas.shift();
+            }
+            previous_qas.push(qa);
+        }
 
         async function addBotMessage(message, usermessage) {
 
@@ -177,6 +186,10 @@
             typingMessage.style.display = "none"; // Hide typing message
             sendButton.disabled = false;
             disabled = false;
+            addQuestionAndAnswerToPrevious({
+                question: usermessage,
+                answer: message
+            });
         }
 
         function addUserMessage(message) {
@@ -188,7 +201,7 @@
         }
 
         async function fetchingAnswer(message) {
-            const question = { "question": message };
+            const question = { "question": message, 'previous_qas': previous_qas };
 
             try {
                 const response = await fetch("/api", {

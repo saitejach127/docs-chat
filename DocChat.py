@@ -3,8 +3,6 @@ import openai  # for calling the OpenAI API
 import pandas as pd  # for storing text and embeddings data
 import tiktoken  # for counting tokens
 from scipy import spatial  # for calculating vector similarities for search
-import os
-import time
 
 class DocChat:
 
@@ -86,6 +84,7 @@ class DocChat:
     def ask(
         self,
         query: str,
+        previous_qas,
         token_budget: int = 4096 - 500,
         print_message: bool = False,
     ) -> str:
@@ -93,10 +92,13 @@ class DocChat:
         model = self.GPT_MODEL
         df = self.df
         message = self.query_message(query, df, model=model, token_budget=token_budget)
+        system_message = f"{self.SYSTEM_CONTEXT_MESSAGE}"
+        for previous_qa in previous_qas:
+            system_message += f"\nYFor this question {previous_qa.question} this is the answer provided {previous_qa.answer}"
         if print_message:
             print(message)
         messages = [
-            {"role": "system", "content": f"{self.SYSTEM_CONTEXT_MESSAGE}"},
+            {"role": "system", "content": system_message},
             {"role": "user", "content": message},
         ]
         response = openai.ChatCompletion.create(
