@@ -41,7 +41,7 @@
         }
 
         .user-message {
-            background-color: #4CAF50;
+            background-color: #ec7200;
             color: white;
             text-align: right;
         }
@@ -67,7 +67,7 @@
             padding: 5px 10px;
             border-radius: 5px;
             border: none;
-            background-color: #4CAF50;
+            background-color: #ec7200;
             color: white;
             cursor: pointer;
         }
@@ -78,7 +78,7 @@
         }
 
         .chat-input button:hover {
-            background-color: #3e8e41;
+            background-color: #ec7200;
         }
 
         a {
@@ -136,7 +136,8 @@
 <body>
     <div class="chat-container">
         <div class="chat-header">
-            <h2>ServiceNow Customer Service Management Question-Answer Chatbot</h2>
+            <h2>Customer Service Management Module Question-Answer Chatbot</h2>
+            <a href="https://downloads.docs.servicenow.com/pdf/enus/servicenow-utah-customer-service-management-enus.pdf" target="_blank">Documentation Refered</a>
         </div>
         <div class="chat-log">
             <!-- <div class="chat-message bot-message">
@@ -164,14 +165,12 @@
 
             const chatMessage = document.createElement("div");
             chatMessage.classList.add("chat-message", "bot-message");
-            var link = '<a href="https://docs.servicenow.com/search?q=' + encodeURIComponent(usermessage) + '" target="_blank" rel="noopener noreferrer">Refer to this link for more info in ServiceNow Documentation Site</a>';
             chatLog.appendChild(chatMessage);
             for (let i = 0; i < message.length; i++) {
                 await new Promise(resolve => setTimeout(resolve, 50)); // Simulate typing speed
                 chatMessage.innerHTML += message.charAt(i);
                 chatLog.scrollTop = chatLog.scrollHeight;
             }
-            chatMessage.innerHTML += `<br> ${link}`;
             chatLog.scrollTop = chatLog.scrollHeight;
 
             typingMessage.style.display = "none"; // Hide typing message
@@ -191,7 +190,7 @@
             const question = { "question": message };
 
             try {
-                const response = await fetch("/api", {
+                const response = await fetch("https://cors-anywhere.herokuapp.com/https://dochat.metamenu.in/api", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
