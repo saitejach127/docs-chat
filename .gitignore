@@ -166,3 +166,6 @@ node_modules/
 package-lock.json
 yarn.lock
 prod_deploy
+models/
+weights/
+output.txt
