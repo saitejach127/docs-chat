@@ -1,7 +1,11 @@
 from flask import Flask, request, render_template
-app = Flask(__name__, template_folder="templates")
+from flask_cors import CORS
 from DocChat import DocChat
 import os
+
+app = Flask(__name__, template_folder="templates")
+CORS(app)
+
 
 EMBEDDING_PATH = "embeddings/csm_nltk.csv"
 INTRODUCTION_QUESTION = 'Use the below ServiceNow Customer Service Management Documentation to answer the subsequent question. If the answer cannot be found in the article, write "I could not find an answer."'
