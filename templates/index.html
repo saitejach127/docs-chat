@@ -3,7 +3,8 @@
 
 <head>
     <title>ServiceNow Customer Service Management Question-Answer Chatbot</title>
-    <link rel="stylesheet" type="text/css" href="style.css">
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    
     <style>
         * {
             box-sizing: border-box;
@@ -38,6 +39,23 @@
         .bot-message {
             background-color: #f2f2f2;
             text-align: left;
+        }
+
+        .chat-related-meesage {
+            padding: 5px;
+            margin: 5px;
+            border-radius: 5px;
+        }
+
+        .bot-related-message {
+            background-color: #f2f2f2;
+            text-align: left;
+            font-size: 0.9em;
+        }
+
+        .bot-related-message a {
+            margin: 5px 0;
+            font-size: 0.9em;
         }
 
         .user-message {
@@ -152,26 +170,32 @@
             <!-- <button id="regenerate-button" onclick="regenerateMessage()" disabled>Regenerate</button> -->
         </div>
     </div>
-    <script>
+    
+    <script type="module">
+        // import { marked } from 'https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js';
+
         const chatLog = document.querySelector(".chat-log");
         const chatInput = document.querySelector(".chat-input input[type='text']");
         const sendButton = document.querySelector(".chat-input button");
         // const regenerateButton = document.querySelector("#regenerate-button");
         const typingMessage = document.querySelector(".typing-message");
         let disabled = false;
+        let top5Links = [];
 
         async function addBotMessage(message, usermessage) {
 
             const chatMessage = document.createElement("div");
             chatMessage.classList.add("chat-message", "bot-message");
-            var link = '<a href="https://docs.servicenow.com/search?q=' + encodeURIComponent(usermessage) + '" target="_blank" rel="noopener noreferrer">Refer to this link for more info in ServiceNow Documentation Site</a>';
+            // let message = marked(mdMessage); // Convert Markdown to HTML using marked
+            // var link = '<a href="https://docs.servicenow.com/search?q=' + encodeURIComponent(usermessage) + '" target="_blank" rel="noopener noreferrer">Refer to this link for more info in ServiceNow Documentation Site</a>';
             chatLog.appendChild(chatMessage);
             for (let i = 0; i < message.length; i++) {
-                await new Promise(resolve => setTimeout(resolve, 50)); // Simulate typing speed
+                await new Promise(resolve => setTimeout(resolve, 25)); // Simulate typing speed
                 chatMessage.innerHTML += message.charAt(i);
                 chatLog.scrollTop = chatLog.scrollHeight;
             }
-            chatMessage.innerHTML += `<br> ${link}`;
+            displayResults(chatMessage,top5Links);
+            // chatMessage.innerHTML += `<br> ${link}`;
             chatLog.scrollTop = chatLog.scrollHeight;
 
             typingMessage.style.display = "none"; // Hide typing message
@@ -214,6 +238,40 @@
             }
         }
 
+        async function googleSearch(query) {
+            try {
+                const response = await axios.get('https://www.googleapis.com/customsearch/v1', {
+                    params: {
+                        key: 'AIzaSyDk-ELznCISR_c-YRptt0Zkep7595CvwnM', // replace with your API key.
+                        cx: 'f56976059edcc4faf', // replace with your Search Engine ID.
+                        q: query,
+                        siteSearch: 'docs.servicenow.com',
+                        lr: 'lang_en'
+                    }
+                });
+                console.log(response.data.items);
+                // Get the top 5 links
+                top5Links = response.data.items.slice(0, 5).map(item => { return {link : item.link, title : item.title}});
+                console.log(top5Links);
+                // displayResults(top5Links);
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        function displayResults(chatMessage,links) {
+            const relatedLinksMessage = document.createElement("div");
+            relatedLinksMessage.classList.add("chat-related-meesage","bot-related-message");
+            relatedLinksMessage.innerHTML = `<span>Here are related links which might help you:</span>`;
+            links.forEach((link,index) => {
+                relatedLinksMessage.innerHTML = relatedLinksMessage.innerHTML + `<a href="${link.link}" target="_blank"> ${link.title}</a>`;
+                if(index < links.length - 1) {
+                    relatedLinksMessage.innerHTML = relatedLinksMessage.innerHTML + `, `;
+                }
+            });
+            chatMessage.appendChild(relatedLinksMessage);
+        }
+
         async function sendMessage() {
             if (!disabled) {
                 const message = chatInput.value.trim();
@@ -222,10 +280,13 @@
                     sendButton.disabled = true;
                     disabled = true;
                     
-                    // const t0 = performance.now();
-                    fetchingAnswer(message);
                     addUserMessage(message);
                     typingMessage.style.display = "block"; // Show typing message
+                    // const t0 = performance.now();
+                    await fetchingAnswer(message);
+                    await googleSearch(message);
+                    
+                    
                     // const t1 = performance.now();
                     // console.log(`Time taken: ${t1 - t0} milliseconds`);
 
