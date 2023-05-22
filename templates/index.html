@@ -4,7 +4,7 @@
 <head>
     <title>ServiceNow Customer Service Management Question-Answer Chatbot</title>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="style.css">
+    
     <style>
         * {
             box-sizing: border-box;
@@ -170,7 +170,10 @@
             <!-- <button id="regenerate-button" onclick="regenerateMessage()" disabled>Regenerate</button> -->
         </div>
     </div>
-    <script>
+    
+    <script type="module">
+        // import { marked } from 'https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js';
+
         const chatLog = document.querySelector(".chat-log");
         const chatInput = document.querySelector(".chat-input input[type='text']");
         const sendButton = document.querySelector(".chat-input button");
@@ -183,6 +186,7 @@
 
             const chatMessage = document.createElement("div");
             chatMessage.classList.add("chat-message", "bot-message");
+            // let message = marked(mdMessage); // Convert Markdown to HTML using marked
             // var link = '<a href="https://docs.servicenow.com/search?q=' + encodeURIComponent(usermessage) + '" target="_blank" rel="noopener noreferrer">Refer to this link for more info in ServiceNow Documentation Site</a>';
             chatLog.appendChild(chatMessage);
             for (let i = 0; i < message.length; i++) {
@@ -211,7 +215,7 @@
             const question = { "question": message };
 
             try {
-                const response = await fetch("http://127.0.0.1:5000/api", {
+                const response = await fetch("/api", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
